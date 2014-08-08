@@ -940,8 +940,6 @@ class HotfrogCrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
-        print("")
-        print("")
 
 
 #Done. Check json file generated. If the file is non empty, there exist company/companies with the searched name..
@@ -969,8 +967,6 @@ class ECPlazaCrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
-        print("")
-        print("")
 
 
 #Done. Check json file generated. If the file is non empty, there exist company/companies with the searched name..
@@ -998,5 +994,3 @@ class EC21CrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
-        print("")
-        print("")
