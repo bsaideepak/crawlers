@@ -61,17 +61,10 @@ class ZomatoCrawlSpider(CrawlSpider):
             area = area.replace(' ','-')
             area = area+'-'
         self.rules = (Rule(SgmlLinkExtractor(allow=(r'zomato.com/'+city+'/'+query+'-'+area+location+'-'+location1+'*'), deny=(r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/menu*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/map*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/review*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/info*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/mulund-west-restaurant*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/photo*')),callback='parse_item',follow=True),)
-        print(location)
-        print(query)
-        print("##############")
         super(ZomatoCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.zomato.com']
         self.start_urls = [kwargs.get('start_url')]
-        print(self.start_urls)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(self.results)
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
+    
     def parse_item(self,response):
         l = XPathItemLoader(item = ZomatoItem(),response = response)
 
@@ -84,21 +77,6 @@ class ZomatoCrawlSpider(CrawlSpider):
         l.add_xpath('timings','//*[@id="mainframe"]/section/div[1]/div/div[2]/div[1]/div[2]/div/div[4]/div[2]/div[1]/span/text()')
 
         res =  l.load_item()
-
-        results = {'name':'','address':'','phone':'','review1':'','review2':'','timings':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-        if 'review1' in res:
-            results['review1'] = res['review1']
-        if 'review2' in res:
-            results['review2'] = res['review2']
-        if 'timings' in res:
-            results['timings'] = res['timings']
 
         return res
 
@@ -136,19 +114,6 @@ class LocalCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
 
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'locality' in res:
-            results['address'] = res['locality']
-        if 'region' in res:
-            results['address'] = results['address'] + res['region']
-        if 'postalcode' in res:
-            results['address'] = results['address'] + res['postalcode']
-        if 'phone' in res:
-            results['phone'] = results['phone']
-
         return res
 
 #DONE.
@@ -184,19 +149,6 @@ class BurrpCrawlSpider(CrawlSpider):
 
         res = l.load_item()
 
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'locality' in res:
-            results['address'] = results['address'] + res['locality']
-        if 'region' in res:
-            results['address'] = results['address'] + res['region']
-        if 'postalcode' in res:
-            results['address'] = results['address'] + res['postalcode']
-
         return res
 
 #DONE Perfectly.
@@ -231,19 +183,6 @@ class YellowBotCrawlSpider(CrawlSpider):
 
         res = l.load_item()
 
-        results = {'name':'','address':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'street_address' in res:
-            results['address'] = res['street_address']
-        if 'locality' in res:
-            results['address'] = results['address'] + res['locality']
-        if 'region' in res:
-            results['address'] = results['address'] + res['region']
-        if 'postalcode' in res:
-            results['address'] = results['address'] + res['postalcode']
-
         return res
 
 #DONE.
@@ -274,18 +213,6 @@ class AmericanTownsCrawlSpider(CrawlSpider):
 
 
         res = l.load_item()
-
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'street_address' in res:
-            results['address'] = res['street_address']
-        if 'city' in res:
-            results['address'] = results['address'] + res['city']
-        if 'phone' in res:
-            results['address'] = results['address'] + res['phone']
-
 
         return res
 
@@ -321,16 +248,7 @@ class JustDialUSCrawlSpider(CrawlSpider):
         l.add_xpath('phone','//*[@id="compdetails"]/section[2]/span[2]/text()')
 
         res = l.load_item()
-
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-
+        
         return res
 
 
@@ -365,15 +283,6 @@ class JustDialIndiaCrawlSpider(CrawlSpider):
 
         res = l.load_item()
 
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-
         return res
 
 
@@ -406,15 +315,6 @@ class CityGridCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
 
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-
         return res
 
 # FILTERED OFFSITE REQUEST.
@@ -446,15 +346,6 @@ class SuperPagesCrawlSpider(CrawlSpider):
         l.add_xpath('phone','//*[@id="phNos"]/span/text()')
 
         res =  l.load_item()
-
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
 
         return results
 
@@ -529,8 +420,6 @@ class AllProductsCrawlSpider(CrawlSpider):
 
         res=  l.load_item()
 
-        results = {'name':'','address':'','phone':'','sales_contact':'','annual_sales':'','capital':'','year_of_establishment':'','company_profile':'','markets':'','url':'','email':''}
-
         return res
 
 #DONE.
@@ -592,17 +481,7 @@ class EveningFlavoursCrawlSpider(CrawlSpider):
         l.add_xpath('company','//*[@id="table48"]/tbody/tr[2]/td[1]/h1/span/a/text()')
 
         res =  l.load_item()
-        results = {'name':'','address':'','phone':'','timings':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'address' in res:
-            results['address'] = res['address']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-        if 'timings' in res:
-            results['timings'] = res['timings']
-
+    
         return res
 
 
@@ -737,19 +616,6 @@ class YellowPagesCrawlSpider(CrawlSpider):
         #reviews left
 
         res =  l.load_item()
-        print("")
-        print("")
-        results = {'name':'','address':'','phone':''}
-
-        if 'company' in res:
-            results['name'] = res['company']
-        if 'st_add' in res:
-            results['address'] = res['st_add']
-        if 'city' in res:
-            results['address'] = results['address'] + res['city']
-        if 'phone' in res:
-            results['phone'] = res['phone']
-
         print("")
         return res
 
@@ -902,7 +768,6 @@ class ThomasNetCrawlSpider(CrawlSpider):
 
         print("")
         print(res)
-        print("")
 
 
 #DONE.
