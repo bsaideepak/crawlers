@@ -22,7 +22,7 @@ class YelpCrawlSpider(CrawlSpider):
         global rules
         query = query.replace(' ','-')
         location = location.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/biz/'+query+'-'+ location+'-')),callback='parse_item'),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/biz/'+query+'-'+ location+'')),callback='parse_item'),)
         self.allowed_domains = ['www.yelp.com']
         super(YelpCrawlSpider, self).__init__(*args, **kwargs)
         self.start_urls = [kwargs.get('start_url')]
@@ -61,10 +61,17 @@ class ZomatoCrawlSpider(CrawlSpider):
             area = area.replace(' ','-')
             area = area+'-'
         self.rules = (Rule(SgmlLinkExtractor(allow=(r'zomato.com/'+city+'/'+query+'-'+area+location+'-'+location1+'*'), deny=(r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/menu*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/map*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/review*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/info*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/mulund-west-restaurant*',r'/'+city+'/'+query+'-'+area+location+'-'+location1+'/photo*')),callback='parse_item',follow=True),)
+        print(location)
+        print(query)
+        print("##############")
         super(ZomatoCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.zomato.com']
         self.start_urls = [kwargs.get('start_url')]
-    
+        print(self.start_urls)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(self.results)
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
     def parse_item(self,response):
         l = XPathItemLoader(item = ZomatoItem(),response = response)
 
@@ -78,6 +85,21 @@ class ZomatoCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
 
+        results = {'name':'','address':'','phone':'','review1':'','review2':'','timings':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+        if 'review1' in res:
+            results['review1'] = res['review1']
+        if 'review2' in res:
+            results['review2'] = res['review2']
+        if 'timings' in res:
+            results['timings'] = res['timings']
+
         return res
 
 
@@ -90,11 +112,11 @@ class ZomatoCrawlSpider(CrawlSpider):
 class LocalCrawlSpider(CrawlSpider):
     name = 'massBlurb_localSpider'
 
-    def __init__(self,city,query,state, *args, **kwargs):
+    def __init__(self,location,query,state, *args, **kwargs):
         global rules
         query = query.replace(' ','-')
-        city = city.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/business/details/'+city+'-'+state+'/'+query+'*')),callback='parse_item',follow=True),)
+        location = location.replace(' ','-')
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/business/details/'+location+'-'+state+'/'+query+'*')),callback='parse_item',follow=True),)
         super(LocalCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.local.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -114,6 +136,19 @@ class LocalCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
 
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'locality' in res:
+            results['address'] = res['locality']
+        if 'region' in res:
+            results['address'] = results['address'] + res['region']
+        if 'postalcode' in res:
+            results['address'] = results['address'] + res['postalcode']
+        if 'phone' in res:
+            results['phone'] = results['phone']
+
         return res
 
 #DONE.
@@ -126,12 +161,11 @@ class BurrpCrawlSpider(CrawlSpider):
     #replace spaces with - in query and location, while passing as parameter.
     #replace spaces with %20 while passing start_url as parameter.
 
-    def __init__(self,query,city,location,location1, *args, **kwargs):
+    def __init__(self,query,location,area, *args, **kwargs):
         global rules
         query = query.replace(' ','-')
         location = location.replace(' ','-')
-        city = city.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+city+'/'+query+'-'+location+'-'+location1+'*')),callback='parse_item',follow=True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+location+'/'+query+'-'+area+'*')),callback='parse_item',follow=True),)
         super(BurrpCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.burrp.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -149,6 +183,19 @@ class BurrpCrawlSpider(CrawlSpider):
 
         res = l.load_item()
 
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'locality' in res:
+            results['address'] = results['address'] + res['locality']
+        if 'region' in res:
+            results['address'] = results['address'] + res['region']
+        if 'postalcode' in res:
+            results['address'] = results['address'] + res['postalcode']
+
         return res
 
 #DONE Perfectly.
@@ -161,11 +208,11 @@ class YellowBotCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_yellowbotSpider'
 
-    def __init__(self,query,city,state, *args, **kwargs):
+    def __init__(self,query,location,state, *args, **kwargs):
         global rules
         query = query.replace(' ','-')
-        city = city.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+query+'-'+city+'-'+state+'*')), callback='parse_item',follow = True),)
+        location = location.replace(' ','-')
+        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+query+'-'+location+'-'+state+'*')), callback='parse_item',follow = True),)
         super(YellowBotCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.yellowbot.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -182,6 +229,19 @@ class YellowBotCrawlSpider(CrawlSpider):
 
 
         res = l.load_item()
+
+        results = {'name':'','address':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'street_address' in res:
+            results['address'] = res['street_address']
+        if 'locality' in res:
+            results['address'] = results['address'] + res['locality']
+        if 'region' in res:
+            results['address'] = results['address'] + res['region']
+        if 'postalcode' in res:
+            results['address'] = results['address'] + res['postalcode']
 
         return res
 
@@ -213,6 +273,18 @@ class AmericanTownsCrawlSpider(CrawlSpider):
 
 
         res = l.load_item()
+
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'street_address' in res:
+            results['address'] = res['street_address']
+        if 'city' in res:
+            results['address'] = results['address'] + res['city']
+        if 'phone' in res:
+            results['address'] = results['address'] + res['phone']
+
 
         return res
 
@@ -248,7 +320,16 @@ class JustDialUSCrawlSpider(CrawlSpider):
         l.add_xpath('phone','//*[@id="compdetails"]/section[2]/span[2]/text()')
 
         res = l.load_item()
-        
+
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
         return res
 
 
@@ -283,6 +364,15 @@ class JustDialIndiaCrawlSpider(CrawlSpider):
 
         res = l.load_item()
 
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
         return res
 
 
@@ -315,6 +405,15 @@ class CityGridCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
 
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
         return res
 
 # FILTERED OFFSITE REQUEST.
@@ -346,6 +445,15 @@ class SuperPagesCrawlSpider(CrawlSpider):
         l.add_xpath('phone','//*[@id="phNos"]/span/text()')
 
         res =  l.load_item()
+
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
 
         return results
 
@@ -396,8 +504,7 @@ class AllProductsCrawlSpider(CrawlSpider):
 
     def __init__(self,category, query, *args, **kwargs):
         global rules
-        q = str(query.split()[0])
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+category+'/'+q),deny=(r'/'+category+'/'+q+'/\d+',r'/'+category+'/'+q+'/showroom*')), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+category+'/'+query),deny=(r'/'+category+'/'+query+'/\d+',r'/'+category+'/'+query+'/showroom*')), callback='parse_item',follow = True),)
         super(AllProductsCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.allproducts.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -419,6 +526,8 @@ class AllProductsCrawlSpider(CrawlSpider):
         l.add_xpath('email','//*[@id="main"]/div[2]/div[2]/div[6]/span[2]/a/text()')
 
         res=  l.load_item()
+
+        results = {'name':'','address':'','phone':'','sales_contact':'','annual_sales':'','capital':'','year_of_establishment':'','company_profile':'','markets':'','url':'','email':''}
 
         return res
 
@@ -444,7 +553,7 @@ class FoursquareCrawlSpider(CrawlSpider):
         l = XPathItemLoader(item = FoursquareItem(),response = response)
 
         l.add_xpath('phone','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[3]/div[1]/div[2]/div[2]/span/text()')
-        l.add_xpath('street_address','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div[2]/div/span[1]/text()')
+        l.add_xpath('st_add','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div[2]/div/span[1]/text()')
         l.add_xpath('locality','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div[2]/div/span[2]/text()')
         l.add_xpath('state','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div[2]/div/span[3]/text()')
         l.add_xpath('postalcode','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div[2]/div/span[4]/text()')
@@ -452,7 +561,25 @@ class FoursquareCrawlSpider(CrawlSpider):
         l.add_xpath('company','//*[@id="container"]/div/div[2]/div[1]/div[2]/div[2]/div[2]/h1/text()')
 
         res =  l.load_item()
-        return res
+        results = {'name':'','address':'','phone':'','timings':''}
+
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'st_add' in res:
+            results['address'] = res['st_add']
+        if 'locality' in res:
+            results['address'] = results['address'] + res['locality']
+        if 'state' in res:
+            results['address'] = results['address'] + res['state']
+        if 'postalcode' in res:
+            results['address'] = results['address'] + res['postalcode']
+        if 'country' in res:
+            results['address'] = results['address'] + res['country']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
+        return results
 
 
 # REQUEST BEING FILTERED.
@@ -481,7 +608,17 @@ class EveningFlavoursCrawlSpider(CrawlSpider):
         l.add_xpath('company','//*[@id="table48"]/tbody/tr[2]/td[1]/h1/span/a/text()')
 
         res =  l.load_item()
-    
+        results = {'name':'','address':'','phone':'','timings':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+        if 'timings' in res:
+            results['timings'] = res['timings']
+
         return res
 
 
@@ -494,11 +631,11 @@ class ZootoutCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_zootoutSpider'
 
-    def __init__(self,query,location, location1, *args, **kwargs):
+    def __init__(self,query,location, *args, **kwargs):
         global rules
         location = location.replace(' ','-')
         query = query.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+query+'-'+location+'-'+location1+'*')), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+query+'-'+location+'*')), callback='parse_item',follow = True),)
         super(ZootoutCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.zootout.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -515,11 +652,22 @@ class ZootoutCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
         print("")
+        results = {'name':'','address':'','phone':'','timings':''}
+        print("Printing from results")
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'st_add' in res:
+            results['address'] = res['st_add']
+        if 'locality' in res:
+            results['address'] = results['address'] + res['locality']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+        if 'timings' in res:
+            results['timings'] = res['timings']
+        return results
 
-        return res
 
-
-#DONE.
+#DONE. ----------TEST--------------
 #Asklaila
 #User Input: location= "Bandra", location1="West" , city="Mumbai" , q = "stomach"
 #start_url="http://www.asklaila.com/search/Mumbai/bandra/stomach/?searchNearby=true"
@@ -529,11 +677,12 @@ class AsklailaCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_asklailaSpider'
 
-    def __init__(self,city,location, location1, query, *args, **kwargs):
+    def __init__(self,city,location, location1, q, *args, **kwargs):
         global rules
-        query = query.split()
-        #query = query.replace('\'','...')
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/listing/'+city+'/'+location+'.'+location1+'/'+query[0]+'*')), callback='parse_item',follow = True),)
+        loc = location.replace(' ','+')
+        print('/listing/'+city+'/'+loc+'+'+location1+'/'+q+'/*')
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/listing/'+city+'/'+location+'.'+location1+'/'+q+'/*')), callback='parse_item',follow = True),)
+        print('/listing/'+city+'/'+loc+'+'+location1+'/'+q+'/*')
         super(AsklailaCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.asklaila.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -550,7 +699,23 @@ class AsklailaCrawlSpider(CrawlSpider):
         l.add_xpath('phone','//*[@id="ldpAdrsDetails"]/p[1]/span/span[1]/text()')
 
         res =  l.load_item()
-        return res
+
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'st_add' in res:
+            results['address'] = res['st_add']
+        if 'locality' in res:
+            results['address'] = results['address'] + res['locality']
+        if 'region' in res:
+            results['address'] = results['address'] + res['region']
+        if 'postalcode' in res:
+            results['address'] = results['address'] + res['postalcode']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
+        return results
 
 #DONE.
 #Timescity
@@ -561,11 +726,10 @@ class TimesCityCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_timescitySpider'
 
-    def __init__(self,city, location, location1, *args, **kwargs):
+    def __init__(self, location, area, *args, **kwargs):
         global rules
-        if location1 is not '':
-            location1 = '-'+location1[0]+'...'
-        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+city+'/'+location+location1+'/*')), callback='parse_item',follow = True),)
+        area = area.replace(' ','-')
+        self.rules = (Rule(SgmlLinkExtractor(allow=(r'/'+location+'/'+area+'/*')), callback='parse_item',follow = True),)
         super(TimesCityCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['timescity.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -595,11 +759,11 @@ class YellowPagesCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_ypSpider'
 
-    def __init__(self,query,location, state, *args, **kwargs):
+    def __init__(self,query,location, *args, **kwargs):
         global rules
         location = location.replace(' ','-')
         query = query.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+location+'-'+ state + '/mip/'+query+'*')), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=('/'+location+'/mip/'+query+'*')), callback='parse_item',follow = True),)
         super(YellowPagesCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.yellowpages.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -617,6 +781,19 @@ class YellowPagesCrawlSpider(CrawlSpider):
 
         res =  l.load_item()
         print("")
+        print("")
+        results = {'name':'','address':'','phone':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'st_add' in res:
+            results['address'] = res['st_add']
+        if 'city' in res:
+            results['address'] = results['address'] + res['city']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+
+        print("")
         return res
 
 
@@ -630,11 +807,11 @@ class PhoneNumberCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_phonenumberSpider'
 
-    def __init__(self,query,location,state, *args, **kwargs):
+    def __init__(self,query,location, *args, **kwargs):
         global rules
         location = location.replace(' ','-')
         query = query.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=('/business/'+query+'-'+location+'-'+state)), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=('/business/'+query+'-'+location)), callback='parse_item',follow = True),)
         super(PhoneNumberCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['www.phonenumber.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -668,11 +845,11 @@ class PocketlyCrawlSpider(CrawlSpider):
 
     name = 'massBlurb_pocketlySpider'
 
-    def __init__(self,query,location,state, *args, **kwargs):
+    def __init__(self,query,location, *args, **kwargs):
         global rules
         location = location.replace(' ','-')
         query = query.replace(' ','-')
-        self.rules = (Rule(SgmlLinkExtractor(allow=('/biz/'+query+'-'+location+'-'+state+'/*')), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=('/biz/'+query+'-'+location+'/*')), callback='parse_item',follow = True),)
         super(PocketlyCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['pocketly.com']
         self.start_urls = [kwargs.get('start_url')]
@@ -693,13 +870,14 @@ class PocketlyCrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
-
+        print("")
+        print("")
 
 
 #DONE. Perfectly.
 #exportersindia.com
 #start_url:
-# http://www.exportersindia.com/search.php?term=khandela+electronika&srch_catg_ty=comp
+# http://www.exportersindia.com/search.php?term=electronika&srch_catg_ty=comp
 #limit:
 # http://www.exportersindia.com/ptagiselectronika/
 
@@ -710,7 +888,6 @@ class ExportersIndiaCrawlSpider(CrawlSpider):
 
     def __init__(self,query, *args, **kwargs):
         global rules
-        query = query.replace(' ','.')
         self.rules = (Rule(SgmlLinkExtractor(allow=('/'+query+'/*')), callback='parse_item',follow = True),)
         super(ExportersIndiaCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['exportersindia.com']
@@ -733,14 +910,34 @@ class ExportersIndiaCrawlSpider(CrawlSpider):
         print("")
         res =  l.load_item()
 
+        results = {'company':'','company_info':'','address':'','phone':'','contact_person':'','fax':'','business_type':'','company_turnover':'','markets':''}
+
+        if 'company' in res:
+            results['name'] = res['company']
+        if 'company_info' in res:
+            results['company_info'] = res['company_info']
+        if 'address' in res:
+            results['address'] = res['address']
+        if 'phone' in res:
+            results['phone'] = res['phone']
+        if 'contact_person' in res:
+            results['contact_person'] = res['contact_person']
+        if 'fax' in res:
+            results['fax'] = res['fax']
+        if 'business_type' in res:
+            results['business_type'] = res['business_type']
+        if 'company_turnover' in res:
+            results['company_turnover'] = res['company_turnover']
+        if 'markets' in res:
+            results['markets'] = res['markets']
 
         print("")
-        return res
+        print(results)
 
 
 #Thomasnet.com
 #start_url:
-# `
+# http://www.thomasnet.com/search.html?which=all&WTZO=Find+Suppliers&searchx=true&what=electronika&Submit.x=0&Submit.y=0&Submit=Search
 
 
 class ThomasNetCrawlSpider(CrawlSpider):
@@ -768,6 +965,7 @@ class ThomasNetCrawlSpider(CrawlSpider):
 
         print("")
         print(res)
+        print("")
 
 
 #DONE.
@@ -805,6 +1003,8 @@ class HotfrogCrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
+        print("")
+        print("")
 
 
 #Done. Check json file generated. If the file is non empty, there exist company/companies with the searched name..
@@ -818,7 +1018,7 @@ class ECPlazaCrawlSpider(CrawlSpider):
 
     def __init__(self,*args, **kwargs):
         global rules
-        self.rules = (Rule(SgmlLinkExtractor(allow=('en.ecplaza.net'),deny=('en.ecplaza.net/gps*','en.ecplaza.net/city*','en.ecplaza.net/bus*','en.ecplaza.net/audio*','en.ecplaza.net/led*','en.ecplaza.net/about*','en.ecplaza.net/tour*','en.ecplaza.net/multi*','en.ecplaza.net/self*','en.ecplaza.net/product*','en.ecplaza.net/auto*')), callback='parse_item',follow = True),)
+        self.rules = (Rule(SgmlLinkExtractor(allow=('en.ecplaza.net')), callback='parse_item',follow = True),)
         super(ECPlazaCrawlSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = ['ecplaza.net']
         self.start_urls = [kwargs.get('start_url')]
@@ -832,6 +1032,8 @@ class ECPlazaCrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
+        print("")
+        print("")
 
 
 #Done. Check json file generated. If the file is non empty, there exist company/companies with the searched name..
@@ -859,3 +1061,5 @@ class EC21CrawlSpider(CrawlSpider):
         print("")
         print("")
         return res
+        print("")
+        print("")
